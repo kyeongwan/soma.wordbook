@@ -29,6 +29,11 @@
 
         </android.support.design.widget.AppBarLayout>
 
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/lv_main_wordlist">
+        </ListView>
 
     </LinearLayout>
 

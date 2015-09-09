@@ -9,7 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +48,16 @@ public class MainActivity extends AppCompatActivity {
             ab.setHomeAsUpIndicator(R.drawable.ic_menu);
             ab.setDisplayHomeAsUpEnabled(true);
         }
+
+        ArrayList<Word> arrayList = new ArrayList<>();
+        Word w1 = new Word("Lemon", "① 레몬② 불량품");
+        Word w2 = new Word("Apple", "① 사과② 사과나무");
+        arrayList.add(w1);
+        arrayList.add(w2);
+
+        ListView listView = (ListView) findViewById(R.id.lv_main_wordlist);
+        ListAdapter adapter = new ListAdapter(MainActivity.this, arrayList);
+        listView.setAdapter(adapter);
     }
 
     @Override
