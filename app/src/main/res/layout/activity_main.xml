@@ -7,11 +7,10 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
         <android.support.design.widget.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
@@ -26,16 +25,34 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:layout_scrollFlags="scroll|enterAlways"/>
 
-
         </android.support.design.widget.AppBarLayout>
 
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/lv_main_wordlist">
+            android:id="@+id/lv_main_wordlist"
+            android:background="#ffffff"
+            android:layout_below="@+id/appbar"
+            android:layout_alignParentEnd="true">
         </ListView>
 
-    </LinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/activity_main_fabBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/plus"
+            app:borderWidth="0dp"
+            app:fabSize="normal"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+
+
 
     <android.support.design.widget.NavigationView
         android:id="@+id/navigation_view"
@@ -45,5 +62,6 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/drawer_header"
         app:menu="@menu/drawer"/>
+
 
 </android.support.v4.widget.DrawerLayout>
