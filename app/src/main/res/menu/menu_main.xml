@@ -3,4 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/sort_1"
+        android:title="오름차순"/>
+    <item android:id="@+id/sort_2"
+        android:title="내림차순"/>
+    <item android:id="@+id/sort_3"
+        android:title="검색횟수순"/>
+    <item android:id="@+id/sort_4"
+        android:title="최신검색순"/>
 </menu>

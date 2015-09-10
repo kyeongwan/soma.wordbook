@@ -12,10 +12,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     DrawerLayout drawer;
     ArrayList<Word> arrayList;
     ListAdapter adapter;
+    FileStorge db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +67,9 @@ public class MainActivity extends AppCompatActivity {
             ab.setHomeAsUpIndicator(R.drawable.ic_menu);
             ab.setDisplayHomeAsUpEnabled(true);
         }
-        arrayList = new ArrayList<>();
-        Word w1 = new Word("Lemon", "① 레몬② 불량품");
-        Word w2 = new Word("Apple", "① 사과② 사과나무");
-        arrayList.add(w1);
-        arrayList.add(w2);
+
+        db = FileStorge.getInstance(getApplicationContext());
+        arrayList = db.loadEntry();
 
         ListView listView = (ListView) findViewById(R.id.lv_main_wordlist);
         adapter = new ListAdapter(MainActivity.this, arrayList);
@@ -121,13 +122,19 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }else if(id == android.R.id.home){
-            drawer.openDrawer(GravityCompat.START);
-            return true;
+        switch (id){
+            case android.R.id.home:
+                drawer.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.sort_1:   // 오름차순
+                return true;
+            case R.id.sort_2:   // 내림차순
+                return true;
+            case R.id.sort_3:   // 검색횟수순
+                return true;
+            case R.id.sort_4:   // 최신검색순
+                return true;
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -164,7 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             System.out.println(sb.toString());
-            arrayList.add(new Word(word, sb.toString()));
+            Word tmp = new Word(word, sb.toString());
+            db.saveEntry(tmp);
+            arrayList.add(tmp);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
