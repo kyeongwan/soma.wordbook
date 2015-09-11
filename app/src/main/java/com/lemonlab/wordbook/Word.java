@@ -14,7 +14,7 @@ public class Word {
     public Word(int id, int count, String Eng, String Kor){
         this.count = count;
         this.id = id;
-        this.wordEng = Eng;
+        this.wordEng = Eng.toLowerCase();
         this.wordKor = Kor;
     }
 

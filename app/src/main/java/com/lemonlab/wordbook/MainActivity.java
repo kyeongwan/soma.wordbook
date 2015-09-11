@@ -28,6 +28,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     ListAdapter adapter;
     FileStorge db;
     ListView listView;
+    Executor executor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +70,19 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
                         }else if("초기 단어 셋팅".equals(menuItem.getTitle())){
-
-                        }
+                            arrayList = db.loadWord(arrayList);
+                            adapter.notifyDataSetChanged();
+                        }else if("단어 뜻 로드".equals(menuItem.getTitle())){
+                            String word;
+                            ArrayList<Word> tmp = (ArrayList)arrayList.clone();
+                            arrayList.clear();
+                            for(int i=tmp.size() - 1; i != 0; i--) {
+                                word = tmp.get(i).getEng();
+                                //arrayList.remove(i);
+                                httpThread2(word);
+                            }
+                        }else if("모두 저장".equals(menuItem.getTitle()))
+                            db.saveAll(arrayList);
                         drawer.closeDrawers();
                         return true;
                     }
@@ -102,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        executor = Executors.newFixedThreadPool(1);
     }
 
     public AlertDialog Dialog(){
@@ -174,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
                     testHttp(word);
                 }
             });
-            thread.start();
+            executor.execute(thread);
+            //thread.start();
         }else{
             map.get(word).increaseCount();
             db.saveCount(map.get(word));
@@ -182,6 +197,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void httpThread2(final String word){
+        if(map.containsKey(word) == false){
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testHttp2(word);
+                }
+            });
+            executor.execute(thread);
+        }else{
+            map.get(word).increaseCount();
+            db.saveCount(map.get(word));
+            adapter.notifyDataSetChanged();
+        }
+    }
 
     void testHttp(String word){
         String url = "http://dic.daum.net/search.do?q="+ word +"&dic=eng";
@@ -203,11 +233,43 @@ public class MainActivity extends AppCompatActivity {
                     sb.append(c);
                 }
             }
-            System.out.println(sb.toString());
             Word tmp = new Word(arrayList.size()+1, 1, word, sb.toString());
             db.saveEntry(tmp);
             arrayList.add(tmp);
-            map.put(word,tmp);
+            map.put(word, tmp);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
+    }
+
+    void testHttp2(String word){
+        String url = "http://dic.daum.net/search.do?q="+ word +"&dic=eng";
+        String response = requestHttp(url);
+
+        if("".equals(response))
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //Toast.makeText(getApplicationContext(), "단어를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        else {
+            StringBuilder sb = new StringBuilder();
+            for (char c : response.toCharArray()) {
+                if ((c >= '"' && c <= 'z')) {
+                    continue;
+                } else {
+                    sb.append(c);
+                }
+            }
+            Word tmp = new Word(arrayList.size()+1, 1, word, sb.toString());
+            //db.saveEntry(tmp);
+            arrayList.add(tmp);
+            map.put(word, tmp);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

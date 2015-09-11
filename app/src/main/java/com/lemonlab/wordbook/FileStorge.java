@@ -42,9 +42,8 @@ public class FileStorge {
         try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(context.getFilesDir()+"/save.txt", true)));
             BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(context.getFilesDir()+"/saveCount.txt", true)));
-            bw.write(word.getEng() + "/" + word.getKor() + "/" + word.getCount() + "\n");
+            bw.write(word.getEng() + "/" + word.getKor() + "/" + "\n");
             bw2.write(String.format("%07d", word.getCount()));
-            System.out.println(word.getCount());
             bw.close();
             bw2.close();
         } catch (FileNotFoundException e) {
@@ -54,9 +53,28 @@ public class FileStorge {
         }
     }
 
+    public static void saveAll(ArrayList<Word> list){
+        deleteAll();
+        try {
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(context.getFilesDir()+"/save.txt", true)));
+            BufferedWriter bw2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(context.getFilesDir()+"/saveCount.txt", true)));
+            for(int i=0; i< list.size(); i++) {
+                bw.write(list.get(i).getEng() + "/" + list.get(i).getKor() + "/" + "\n");
+                bw2.write("0000001");
+            }
+            bw.close();
+            bw2.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void saveCount(Word word){
         int id = word.getId();
-        System.out.println("id : " + id);
         try {
             RandomAccessFile rfile = new RandomAccessFile(context.getFilesDir()+"/saveCount.txt", "rw");
             rfile.seek(id * 7 - 7);
@@ -119,6 +137,25 @@ public class FileStorge {
             file2.delete();
             file2 = new File(context.getFilesDir(), "saveCount.txt");
         }
+    }
 
+    public static ArrayList<Word> loadWord(ArrayList<Word> list){
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open("wordEn")));
+            String data = "";
+            while(true) {
+                data = reader.readLine();
+                if(data == null)
+                    break;
+                Word word = new Word(list.size() + 1, 1, data, "null");
+                //saveEntry(word);
+                list.add(word);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }
