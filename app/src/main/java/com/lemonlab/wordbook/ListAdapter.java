@@ -48,10 +48,12 @@ public class ListAdapter extends BaseAdapter {
 
         TextView tvTitle = (TextView) view.findViewById(R.id.tv_wordlist_title);
         TextView tvWord = (TextView) view.findViewById(R.id.tv_wordlist_word);
+        TextView tvCount = (TextView) view.findViewById(R.id.tv_wordlist_count);
 
         Word word = item.get(i);
         tvTitle.setText(word.getEng());
         tvWord.setText(word.getKor());
+        tvCount.setText(word.getCount()+"");
 
         return view;
     }

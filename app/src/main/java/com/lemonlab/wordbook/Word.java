@@ -5,14 +5,17 @@ package com.lemonlab.wordbook;
  */
 public class Word {
 
+    private int id;
+    private int count;
     private String wordEng;
     private String wordKor;
-    private int count;
 
-    public Word(String Eng, String Kor){
+
+    public Word(int id, int count, String Eng, String Kor){
+        this.count = count;
+        this.id = id;
         this.wordEng = Eng;
         this.wordKor = Kor;
-        this.count = 0;
     }
 
     public String getEng(){
@@ -29,6 +32,10 @@ public class Word {
 
     public int getCount(){
         return count;
+    }
+
+    public int getId(){
+        return id;
     }
 
 }

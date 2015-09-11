@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,12 +27,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity {
 
     DrawerLayout drawer;
     ArrayList<Word> arrayList;
+    HashMap<String, Word> map;
     ListAdapter adapter;
     FileStorge db;
 
@@ -70,6 +70,10 @@ public class MainActivity extends AppCompatActivity {
 
         db = FileStorge.getInstance(getApplicationContext());
         arrayList = db.loadEntry();
+        map = new HashMap<>();
+
+        for(Word word : arrayList)          // 검색한 단어 해싱하여 메모리에 저장
+            map.put(word.getEng(), word);
 
         ListView listView = (ListView) findViewById(R.id.lv_main_wordlist);
         adapter = new ListAdapter(MainActivity.this, arrayList);
@@ -127,12 +131,20 @@ public class MainActivity extends AppCompatActivity {
                 drawer.openDrawer(GravityCompat.START);
                 return true;
             case R.id.sort_1:   // 오름차순
+                Collections.sort(arrayList, new InorderSort());
+                adapter.notifyDataSetChanged();
                 return true;
             case R.id.sort_2:   // 내림차순
+                Collections.sort(arrayList, new PreorderSort());
+                adapter.notifyDataSetChanged();
                 return true;
             case R.id.sort_3:   // 검색횟수순
+                Collections.sort(arrayList, new CountSort());
+                adapter.notifyDataSetChanged();
                 return true;
             case R.id.sort_4:   // 최신검색순
+                Collections.sort(arrayList, new IdSort());
+                adapter.notifyDataSetChanged();
                 return true;
         }
 
@@ -140,13 +152,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void httpThread(final String word){
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                testHttp(word);
-            }
-        });
-        thread.start();
+        if(map.containsKey(word) == false){
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testHttp(word);
+                }
+            });
+            thread.start();
+        }else{
+            map.get(word).increaseCount();
+            db.saveCount(map.get(word));
+            adapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -171,9 +189,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             System.out.println(sb.toString());
-            Word tmp = new Word(word, sb.toString());
+            Word tmp = new Word(arrayList.size()+1, 1, word, sb.toString());
             db.saveEntry(tmp);
             arrayList.add(tmp);
+            map.put(word,tmp);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
