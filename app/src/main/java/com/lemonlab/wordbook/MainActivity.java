@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     HashMap<String, Word> map;
     ListAdapter adapter;
     FileStorge db;
+    ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,20 @@ public class MainActivity extends AppCompatActivity {
                         }
                         Toast.makeText(getApplicationContext(),
                                 menuItem.getTitle(), Toast.LENGTH_SHORT).show();
+                        if("단어 초기화".equals(menuItem.getTitle())) {
+                            db.deleteAll();
+                            arrayList.clear();
+                            listView.setAdapter(adapter);
+                            map.clear();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+                        }else if("초기 단어 셋팅".equals(menuItem.getTitle())){
+
+                        }
                         drawer.closeDrawers();
                         return true;
                     }
@@ -75,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         for(Word word : arrayList)          // 검색한 단어 해싱하여 메모리에 저장
             map.put(word.getEng(), word);
 
-        ListView listView = (ListView) findViewById(R.id.lv_main_wordlist);
+        listView = (ListView) findViewById(R.id.lv_main_wordlist);
         adapter = new ListAdapter(MainActivity.this, arrayList);
         listView.setAdapter(adapter);
 

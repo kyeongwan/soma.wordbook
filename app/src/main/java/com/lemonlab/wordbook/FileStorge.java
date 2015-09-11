@@ -109,4 +109,16 @@ public class FileStorge {
         }
         return new ArrayList<>();
     }
+
+    public static void deleteAll(){
+        if(file.exists()){
+            file.delete();
+            file =  new File(context.getFilesDir(), "save.txt");
+        }
+        if(file2.exists()) {
+            file2.delete();
+            file2 = new File(context.getFilesDir(), "saveCount.txt");
+        }
+
+    }
 }
