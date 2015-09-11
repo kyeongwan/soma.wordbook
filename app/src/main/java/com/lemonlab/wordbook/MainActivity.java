@@ -1,6 +1,7 @@
 package com.lemonlab.wordbook;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -29,7 +30,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -41,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     FileStorge db;
     ListView listView;
     Executor executor;
+    ExecutorService executorService;
+    ProgressDialog progressDialog;
+    LinkedBlockingQueue linkedBlockingQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,11 +82,30 @@ public class MainActivity extends AppCompatActivity {
                             String word;
                             ArrayList<Word> tmp = (ArrayList)arrayList.clone();
                             arrayList.clear();
+                            visibleprogress();
                             for(int i=tmp.size() - 1; i != 0; i--) {
                                 word = tmp.get(i).getEng();
                                 //arrayList.remove(i);
                                 httpThread2(word);
                             }
+                            executorService.shutdown();
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    while(!executorService.isTerminated()) {
+                                    }
+                                    hideprograssDialog();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                    db.saveAll(arrayList);
+                                }
+                            });
+                            thread.start();
+
                         }else if("모두 저장".equals(menuItem.getTitle()))
                             db.saveAll(arrayList);
                         drawer.closeDrawers();
@@ -116,7 +141,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        linkedBlockingQueue = new LinkedBlockingQueue<Runnable>();
         executor = Executors.newFixedThreadPool(1);
+        executorService = Executors.newFixedThreadPool(30);
     }
 
     public AlertDialog Dialog(){
@@ -189,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             executor.execute(thread);
+
             //thread.start();
         }else{
             map.get(word).increaseCount();
@@ -205,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                     testHttp2(word);
                 }
             });
-            executor.execute(thread);
+            executorService.execute(thread);
         }else{
             map.get(word).increaseCount();
             db.saveCount(map.get(word));
@@ -270,12 +298,6 @@ public class MainActivity extends AppCompatActivity {
             //db.saveEntry(tmp);
             arrayList.add(tmp);
             map.put(word, tmp);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    adapter.notifyDataSetChanged();
-                }
-            });
         }
     }
 
@@ -307,5 +329,17 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    private void visibleprogress() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading....");
+        progressDialog.show();
+    }
+
+    private void hideprograssDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
 
 }
